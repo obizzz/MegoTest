@@ -6,10 +6,20 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace MegoTest.Controllers
 {
+    
     [Route("api/[controller]/[action]")]
     [ApiController]
     public class ExternalSearchSystemsController : ControllerBase
     {
+        private IExternalSearch _externalSearch { get; set; }
+        private IMetricBuilder _metricBuilder { get; set; }
+
+        public ExternalSearchSystemsController(IExternalSearch externalSearch, IMetricBuilder metricBuilder)
+        {
+            this._externalSearch = externalSearch;
+            this._metricBuilder = metricBuilder;
+        }
+        
         /// <summary>
         /// Searches external search systems
         /// </summary>
@@ -35,7 +45,7 @@ namespace MegoTest.Controllers
                 return Problem("[randomMin] param should be less than [randomMax] param");
             }
 
-            var searchResult = ExternalSearch.Search(wait, randomMin, randomMax);
+            var searchResult = _externalSearch.Search(wait, randomMin, randomMax);
             return Ok(searchResult);
         }
 
@@ -47,7 +57,7 @@ namespace MegoTest.Controllers
         [HttpPost("/metrics")]
         public ObjectResult GetMetrics(List<SearchRequestResult> searchResults)
         {
-            var metrics = MetricService.GroupByTime(searchResults);
+            var metrics = _metricBuilder.GroupByTime(searchResults);
             return Ok(metrics.ToList());
         }
     }

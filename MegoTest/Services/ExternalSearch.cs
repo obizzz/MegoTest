@@ -9,7 +9,7 @@ using MegoTest.Models;
 
 namespace MegoTest.Services
 {
-    public abstract class ExternalSearch
+    public class ExternalSearch : IExternalSearch
     {
         Random _random = new Random();
 
@@ -26,7 +26,7 @@ namespace MegoTest.Services
             return await Task.Run(() => Request(randomMin, randomMax));
         }
 
-        public static SearchTotalResult Search(int wait, int randomMin, int randomMax)
+        public SearchTotalResult Search(int wait, int randomMin, int randomMax)
         {
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
@@ -54,7 +54,7 @@ namespace MegoTest.Services
             return searchTotalResult;
         }
 
-        private static List<ExternalSearch> InitExternalSearches()
+        private List<ExternalSearch> InitExternalSearches()
         {
             var externals = new List<ExternalSearch>();
 
@@ -69,8 +69,7 @@ namespace MegoTest.Services
             return externals;
         }
 
-        private static List<SearchRequestResult> RequestAllAsync(List<ExternalSearch> externalSearches, int timeout,
-            int randomMin, int randomMax)
+        private List<SearchRequestResult> RequestAllAsync(List<ExternalSearch> externalSearches, int timeout, int randomMin, int randomMax)
         {
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
@@ -105,7 +104,7 @@ namespace MegoTest.Services
             return GetResults(externals);
         }
 
-        private static List<SearchRequestResult> GetResults(List<SearchRequest> requests)
+        private List<SearchRequestResult> GetResults(List<SearchRequest> requests)
         {
             var results = new List<SearchRequestResult>();
 

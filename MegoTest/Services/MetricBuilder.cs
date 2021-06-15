@@ -4,9 +4,9 @@ using MegoTest.Models;
 
 namespace MegoTest.Services
 {
-    public class MetricService
+    public class MetricBuilder : IMetricBuilder
     {
-        public static IEnumerable<Metric> GroupByTime(List<SearchRequestResult> searchResults)
+        public IEnumerable<Metric> GroupByTime(List<SearchRequestResult> searchResults)
         {
             var metrics = InitMetrics(searchResults.Max(e => e.Duration));
             foreach (var searchSystem in searchResults)
@@ -19,7 +19,7 @@ namespace MegoTest.Services
             return metrics;
         }
 
-        private static Metric[] InitMetrics(long maxDuration)
+        private Metric[] InitMetrics(long maxDuration)
         {
             var groupCount = maxDuration / 1000 + 1;
             var groups = new Metric[groupCount];

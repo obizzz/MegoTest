@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Reflection;
+using MegoTest.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -21,6 +22,10 @@ namespace MegoTest
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+
+            services.AddTransient<IExternalSearch, ExternalSearch>();
+            services.AddTransient<IMetricBuilder, MetricBuilder>();
+            
             services.AddSwaggerGen(c =>
             {
                 // Set the comments path for the Swagger JSON and UI.
