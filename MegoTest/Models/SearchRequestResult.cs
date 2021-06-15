@@ -1,8 +1,9 @@
-﻿using System.Net;
+﻿#nullable enable
+using System.Net;
 
 namespace MegoTest.Models
 {
-    public class RequestResult
+    public class SearchRequestResult
     {
         public string Name { get; set; }
         public string Status { get; set; }

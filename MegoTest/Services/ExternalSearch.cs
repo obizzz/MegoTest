@@ -12,7 +12,8 @@ namespace MegoTest.Services
     public abstract class ExternalSearch
     {
         Random _random = new Random();
-        private HttpStatusCode Request(int randomMin, int randomMax)
+
+        public HttpStatusCode Request(int randomMin, int randomMax)
         {
             var duration = _random.Next(randomMin, randomMax);
             Thread.Sleep(duration);
@@ -24,29 +25,58 @@ namespace MegoTest.Services
         {
             return await Task.Run(() => Request(randomMin, randomMax));
         }
-        
-        public static List<ExternalSearch> InitExternalSearches()
+
+        public static SearchTotalResult Search(int wait, int randomMin, int randomMax)
         {
-            var externals = new List<ExternalSearch> ();
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+            stopwatch.Stop();
+            stopwatch.Restart();
+
+            var searchTotalResult = new SearchTotalResult();
+
+            var externalSearches = InitExternalSearches();
+            searchTotalResult.SearchSystems = RequestAllAsync(externalSearches, wait, randomMin, randomMax);
+
+            var externalC = searchTotalResult.SearchSystems.FirstOrDefault(x => x.Name == "ExternalC");
+            if (externalC != null && externalC.Status == HttpStatusCode.OK.ToString())
+            {
+                var externalD = new ExternalD();
+                var externalDResult =
+                    RequestAllAsync(new List<ExternalSearch> {externalD}, wait, randomMin, randomMax);
+                if (externalDResult.FirstOrDefault() != null)
+                {
+                    searchTotalResult.SearchSystems.Add(externalDResult.FirstOrDefault());
+                }
+            }
+
+            searchTotalResult.SearchDuration = stopwatch.ElapsedMilliseconds;
+            return searchTotalResult;
+        }
+
+        private static List<ExternalSearch> InitExternalSearches()
+        {
+            var externals = new List<ExternalSearch>();
 
             var externalA = new ExternalA();
             var externalB = new ExternalB();
             var externalC = new ExternalC();
-            
+
             externals.Add(externalA);
             externals.Add(externalB);
             externals.Add(externalC);
 
             return externals;
         }
-        
-        public static List<RequestResult> RequestAllAsync(List<ExternalSearch> externalSearches, int timeout, int randomMin, int randomMax)
+
+        private static List<SearchRequestResult> RequestAllAsync(List<ExternalSearch> externalSearches, int timeout,
+            int randomMin, int randomMax)
         {
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
             stopwatch.Stop();
             stopwatch.Reset();
-            
+
             var externals = new List<SearchRequest>();
 
             foreach (var externalSearch in externalSearches)
@@ -56,7 +86,7 @@ namespace MegoTest.Services
                 searchRequest.Request = externalSearch.RequestAsync(randomMin, randomMax);
                 externals.Add(searchRequest);
             }
-            
+
             stopwatch.Start();
 
             var uncompletedRequestsCount = externals.Count;
@@ -75,13 +105,13 @@ namespace MegoTest.Services
             return GetResults(externals);
         }
 
-        public static List<RequestResult> GetResults(List<SearchRequest> requests)
+        private static List<SearchRequestResult> GetResults(List<SearchRequest> requests)
         {
-            var results = new List<RequestResult>();
-            
+            var results = new List<SearchRequestResult>();
+
             foreach (var request in requests)
             {
-                var searchResult = new RequestResult();
+                var searchResult = new SearchRequestResult();
                 searchResult.Name = request.ExternalSearch.ToString()?.Split('.').LastOrDefault();
                 if (request.Request.IsCompleted)
                 {

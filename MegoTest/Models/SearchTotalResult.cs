@@ -2,9 +2,9 @@
 
 namespace MegoTest.Models
 {
-    public class SearchResult
+    public class SearchTotalResult
     {
-        public List<RequestResult> SearchSystems { get; set; }
+        public List<SearchRequestResult> SearchSystems { get; set; }
         public long SearchDuration { get; set; }
     }
 }
